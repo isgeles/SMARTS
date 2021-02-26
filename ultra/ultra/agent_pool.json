@@ -20,6 +20,11 @@
             "name" : "dqn",
             "locator" : "dqn-v0"
         },
+        "dqn_tf" : {
+            "path" : "ultra.baselines.dqn_tf",
+            "name" : "dqn_tf",
+            "locator" : "dqn_tf-v0"
+        },
         "bdqn" : {
             "path" : "ultra.baselines.bdqn",
             "name" : "bdqn",

@@ -40,7 +40,7 @@ from ultra.baselines.adapter import BaselineAdapter
 from ultra.baselines.common.yaml_loader import load_yaml
 
 
-class BaselineAgentSpec(AgentSpec):
+class BaselineAgentSpec():
     def __init__(
         self,
         policy_class,
