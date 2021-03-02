@@ -24,7 +24,7 @@ from typing import Any, Callable, Optional
 
 import cloudpickle
 
-from .agent_interface import AgentInterface
+from smarts.core.agent_interface import AgentInterface
 
 warnings.simplefilter("once")
 
@@ -78,7 +78,7 @@ class AgentSpec:
         agent_spec = AgentSpec(
             interface=AgentInterface.from_type(AgentType.Laner),
             agent_params={"agent_function": lambda _: "keep_lane"},
-            agent_builder=AgentPolicy.from_function,
+            agent_builder=Agent.from_function,
         )
 
         env = gym.make(

@@ -44,6 +44,10 @@ from ultra.evaluate import evaluation_check
 from ultra.utils.episode import episodes
 
 
+from tf_agents.environments.parallel_py_environment import ParallelPyEnvironment
+from tf_agents.environments.tf_py_environment import TFPyEnvironment
+from ultra.env import ultra_tf_env
+
 def main(
     scenario_info,
     num_episodes,
@@ -64,10 +68,20 @@ def main(
     # Temp parameters
     headless = True
 
-    spec = make(locator=policy_class, max_episode_steps=max_episode_steps)
+    spec = make(locator=policy_class, 
+        max_episode_steps=1000)
 
+    # spec = make(locator=policy_class, 
+    #     max_episode_steps=1000,
+    #     checkpoint_dir = "./checkpoint_dir") 
+
+    # This `max_episode_steps` applies to the environment, and goes into AgentInterface().
+    # Both of these `max_episode_steps` and `checkpoint_dir` variable can be defined here or
+    # in BaselineAgentSpec() definition in /SMARTS/ultra/ultra/baselines/__init__.py .
     
-    env = gym.make(
+    # print()
+
+    gym_env = gym.make(
         "ultra.env:ultra-v0",
         agent_specs={AGENT_ID: spec},
         scenario_info=scenario_info,
@@ -76,34 +90,53 @@ def main(
         seed=seed,
     )
 
-
-    agent_specs={AGENT_ID: spec}
-    print(agent_specs.keys())
     print("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
-    exit()
+    # env_name = "ultra.env:ultra-v0"
+    # env_test = suite_gym.load(
+    #     environment_name = env_name,
+    #     gym_kwargs = {
+    #         "agent_specs":{AGENT_ID: spec},
+    #         "scenario_info":scenario_info,
+    #         "headless":headless,
+    #         "timestep_sec":timestep_sec,
+    #         "seed":seed
+    #     },
+    # )
+    env_test = suite_gym.wrap_env(
+        gym_env= gymEnv,
+    )    
 
+    ultra_env_kwargs = {
+        "agent_specs":{AGENT_ID: spec},
+        "scenario_info":scenario_info,
+        "headless":headless,
+        "timestep_sec":timestep_sec,
+        "seed":seed}
 
     # Parallel training environment
+    train_num_parallel_environments=1
     tf_env = TFPyEnvironment(
                 ParallelPyEnvironment([
-                        lambda: suite_atari.load(
-                            env_name,
-                            env_wrappers=[
-                                lambda env: TimeLimit(env, duration=max_steps_per_episode)
-                            ],
-                            gym_env_wrappers=[
-                                AtariPreprocessing, FrameStack4
-                            ],
+                         lambda: ultra_tf_env.UltraTFEnv(
+                            ultra_env_kwargs
                         )
-                    ]*train_num_parallel_environments
+                    ]*c
                 )
             )
     tf_env.seed([42]*tf_env.batch_size)
     tf_env.reset()
 
+
+    print("Finished executing tfpyenvironment")
     exit()
 
     agent = spec.build_agent()
+
+    # print(agent.e)
+
+    # print("I am inside _TF 99999999999999999999 ")
+    # exit()
+
 
     for episode in episodes(num_episodes, etag=policy_class, log_dir=log_dir):
         observations = env.reset()
