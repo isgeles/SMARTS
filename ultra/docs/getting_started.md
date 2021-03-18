@@ -17,13 +17,13 @@ Task 1 Training Scenario|Task 1 Testing Scenario
   > Maps are descriptions of the roads used in the scenarios and only need to be compiled once. They only need to be compiled again if they have been modified.
 - Now we can generate the scenarios for Task 1. Each task has a `config.yaml` file describing the levels of the task:
   ```yaml
-  ego_mission:
-  ...  # The start and end points of the agent's route.
   level:
     ...
     <level_name>:
       train:
         total:  # The number of training scenarios to generate.
+        ego_missions:
+          ...  # The start and end points of the agent's mission.
         intersection_types:
           <intersection_shape>:
               percent:  # Proportion of scenarios with this intersection.
