@@ -205,16 +205,16 @@ class TrajectoryTrackingController:
         normalized_speed = np.clip(
             (METER_PER_SECOND_TO_KM_PER_HR * trajectory[3][0] - 20) / (80 - 20), 0, 1
         )
-        lateral_gain = lerp(3, final_lateral_gain, normalized_speed)
-        heading_gain = lerp(0.03, final_heading_gain, normalized_speed)
+        lateral_gain = lerp(0.5, final_lateral_gain, normalized_speed)
+        heading_gain = lerp(0.005, final_heading_gain, normalized_speed)
         steering_filter_constant = lerp(
             2, final_steering_filter_constant, normalized_speed
         )
         heading_error_derivative_gain = lerp(
-            1.5, final_heading_error_derivative_gain, normalized_speed
+            0.4, final_heading_error_derivative_gain, normalized_speed
         )
         lateral_error_derivative_gain = lerp(
-            0.2, final_lateral_error_derivative_gain, normalized_speed
+            0.1, final_lateral_error_derivative_gain, normalized_speed
         )
 
         (
