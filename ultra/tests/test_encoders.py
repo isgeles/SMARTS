@@ -28,6 +28,13 @@ import torch
 
 from smarts.core.events import Events
 from ultra.baselines.common.social_vehicle_config import get_social_vehicle_configs
+from ultra.baselines.common.social_vehicles_encoders.pointnet_encoder import PNEncoder
+from ultra.baselines.common.social_vehicles_encoders.pointnet_encoder_batched import (
+    PNEncoderBatched,
+)
+from ultra.baselines.common.social_vehicles_encoders.precog_encoder import (
+    PrecogFeatureExtractor,
+)
 from ultra.baselines.common.yaml_loader import load_yaml
 from ultra.baselines.dqn.dqn.network import DQNWithSocialEncoder
 from ultra.baselines.dqn.dqn.policy import DQNPolicy
@@ -99,12 +106,19 @@ class EncoderTest(unittest.TestCase):
             "seed": 2,
         }
         social_vehicle_config = get_social_vehicle_configs(**social_vehicle_config_dict)
+        social_vehicle_config["encoder"]["social_feature_encoder_params"]["bias"] = False
+
+        print("social_vehicle_config:", social_vehicle_config)
 
         network_params = {
             "num_actions": num_actions,
             "state_size": state_size,
-            "social_feature_encoder_class": social_vehicle_config["encoder"]["social_feature_encoder_class"],
-            "social_feature_encoder_params": social_vehicle_config["encoder"]["social_feature_encoder_params"],
+            "social_feature_encoder_class": social_vehicle_config["encoder"][
+                "social_feature_encoder_class"
+            ],
+            "social_feature_encoder_params": social_vehicle_config["encoder"][
+                "social_feature_encoder_params"
+            ],
         }
         network = DQNWithSocialEncoder(**network_params).to(device)
 
@@ -120,7 +134,7 @@ class EncoderTest(unittest.TestCase):
         X, y = self._generate_random_dataset(
             batch_size,
             NUM_LOW_DIM_STATES + NUM_SOCIAL_FEATURES * NUM_SOCIAL_VEHICLES,
-            action_size
+            action_size,
         )
 
         low_dim_states = torch.from_numpy(X[:, :NUM_LOW_DIM_STATES]).to(device)
@@ -128,7 +142,7 @@ class EncoderTest(unittest.TestCase):
             torch.from_numpy(social_vehicles_features).to(device)
             for social_vehicles_features in np.resize(
                 X[:, NUM_LOW_DIM_STATES:],
-                (batch_size, NUM_SOCIAL_VEHICLES, NUM_SOCIAL_FEATURES)
+                (batch_size, NUM_SOCIAL_VEHICLES, NUM_SOCIAL_FEATURES),
             )
         ]
         actions = torch.from_numpy(y).to(device)
@@ -151,10 +165,78 @@ class EncoderTest(unittest.TestCase):
             print("final parameter:", parameter)
             break
 
+    def test_encoder_observations(self):
+        SOCIAL_POLICY_HIDDEN_UNITS = 128
+        NUM_SOCIAL_FEATURES = 4
+        SOCIAL_CAPACITY = 2
+        SEED = 2
+
+        input_array = np.zeros(
+            shape=(SOCIAL_CAPACITY, NUM_SOCIAL_FEATURES), dtype=np.float32
+        )
+        input_tensor = torch.from_numpy(input_array).unsqueeze(axis=0)
+
+        print("input_tensor:", input_tensor)
+
+        # Test the precog encoder.
+        precog_encoder = PrecogFeatureExtractor(
+            hidden_units=SOCIAL_POLICY_HIDDEN_UNITS,
+            n_social_features=NUM_SOCIAL_FEATURES,
+            social_capacity=SOCIAL_CAPACITY,
+            embed_dim=8,
+            seed=SEED,
+            bias=False,
+        )
+        precog_encoder.eval()
+        with torch.no_grad():
+            precog_result = precog_encoder(input_tensor)[0][0]
+        print("precog output:", precog_result)
+        print("precog output shape:", precog_result.shape)
+        expected_precog_result = torch.zeros_like(precog_result)
+        self.assertTrue(torch.equal(precog_result, expected_precog_result))
+
+        # Test the pointnet encoder.
+        pointnet_encoder = PNEncoder(
+            input_dim=NUM_SOCIAL_FEATURES,
+            global_features=True,
+            feature_transform=True,
+            nc=8,
+            transform_loss_weight=0.1,
+            bias=False,
+        )
+        pointnet_encoder.eval()
+        with torch.no_grad():
+            pointnet_result = pointnet_encoder(input_tensor)[0][0]
+        print("pointnet output:", pointnet_result)
+        print("pointnet output shape:", pointnet_result.shape)
+        expected_pointnet_result = torch.zeros_like(pointnet_result)
+        self.assertTrue(torch.equal(pointnet_result, expected_pointnet_result))
+
+        # Test the pointnet batched encoder.
+        pointnet_batched_encoder = PNEncoderBatched(
+            input_dim=NUM_SOCIAL_FEATURES,
+            global_features=True,
+            feature_transform=True,
+            nc=8,
+            transform_loss_weight=0.1,
+            bias=False,
+        )
+        pointnet_batched_encoder.eval()
+        with torch.no_grad():
+            pointnet_batched_result = pointnet_batched_encoder(input_tensor)[0][0]
+        print("pointnet batched output", pointnet_batched_result)
+        print("pointnet batched output shape:", pointnet_batched_result.shape)
+        expected_pointnet_batched_result = torch.zeros_like(pointnet_batched_result)
+        self.assertTrue(torch.equal(pointnet_batched_result, expected_pointnet_batched_result))
+
     def _generate_random_dataset(self, batch_size, input_size, output_size):
         return (
-            np.random.uniform(low=-1.0, high=1.0, size=(batch_size, input_size)).astype(np.float32),
-            np.random.uniform(low=-1.0, high=1.0, size=(batch_size, output_size)).astype(np.float32)
+            np.random.uniform(low=-1.0, high=1.0, size=(batch_size, input_size)).astype(
+                np.float32
+            ),
+            np.random.uniform(
+                low=-1.0, high=1.0, size=(batch_size, output_size)
+            ).astype(np.float32),
         )
 
     def _generate_random_state(self, low_dim_state_size, social_vehicles_size):
