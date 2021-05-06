@@ -24,6 +24,9 @@ import torch.nn as nn
 import numpy as np
 
 
+# TODO: What is this actually doing?
+# TODO: Also run a task X level road-blocks test.
+
 class PrecogFeatureExtractor(nn.Module):
     def __init__(
         self,
@@ -52,22 +55,27 @@ class PrecogFeatureExtractor(nn.Module):
         self.output_dim = embed_dim * social_capacity
 
     def forward(self, social_states, training=False):
+        # print(f"social_states:\n{social_states}")
         if self.social_capacity == 0:
             social_states = [torch.empty(0, self.n_social_features)]
         else:
             social_states = [e[: self.social_capacity] for e in social_states]
+        # print(f"social_states after if:\n{social_states}")
 
         social_lens = [len(e) for e in social_states]
         slice_indices = list(np.cumsum(social_lens))
         slice_indices.insert(0, 0)
         social_features = torch.cat(social_states, 0)
+        # print(f"social_features:\n{social_features}")
         social_embeddings = self.social_net(social_features)
+        # print(f"social_embeddings:\n{social_embeddings}")
         masked_embeddings = [
             self._mask_embedding(
                 social_embeddings[slice_indices[j] : slice_indices[j + 1]]
             )
             for j in range(len(social_states))
         ]
+        # print(f"masked_embeddings:\n{masked_embeddings}")
 
         state = [e.unsqueeze(0) for e in masked_embeddings]
 
