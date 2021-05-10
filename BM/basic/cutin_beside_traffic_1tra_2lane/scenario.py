@@ -31,9 +31,9 @@ ego_missions = [
             t.Via("straightaway", 1, 70, 12.9),
             t.Via("straightaway", 0, 80, 12.9),
             t.Via("straightaway", 0, 160, 12.9),
-            t.Via("straightaway", 1, 220, 14),
-            t.Via("straightaway", 1, 460, 16),
-            t.Via("straightaway", 0, 500, 16),
+            t.Via("straightaway", 1, 180, 14),
+            t.Via("straightaway", 1, 360, 16),
+            t.Via("straightaway", 0, 480, 16),
         ],
     )
 ]

@@ -1,15 +1,19 @@
+from BM.basic.utilities import wait_on_front_vehicles
+from smarts.core.utils.math import squared_dist
+from typing import List
 from smarts.core.controllers import ActionSpaceType
 from checker_cutin import CutinChecker
 from check_uturn import UTurnChecker
 from checker_host import CheckerConfig, CheckerHost
 from examples.single_agent import UTurnAgent
 import logging
+import math
 import os
 import gym
 
 from examples import default_argument_parser
 from smarts.core.agent import Agent, AgentSpec
-from smarts.core.agent_interface import AgentInterface, AgentType
+from smarts.core.agent_interface import AgentInterface
 from smarts.core.sensors import Observation
 from smarts.core.utils.episodes import episodes
 
@@ -19,7 +23,15 @@ AGENT_ID = "Agent-007"
 
 
 class ChaseViaPointsAgent(Agent):
+    CHASE_DIST = 15
+
     def act(self, obs: Observation):
+        should_wait, action = wait_on_front_vehicles(
+            obs, self.CHASE_DIST, obs.ego_vehicle_state.lane_id
+        )
+        if should_wait:
+            return action
+
         if (
             len(obs.via_data.near_via_points) < 1
             or obs.ego_vehicle_state.edge_id != obs.via_data.near_via_points[0].edge_id
@@ -37,21 +49,21 @@ class ChaseViaPointsAgent(Agent):
 
 
 def main(scenarios, sim_name, headless, num_episodes, seed, max_episode_steps=None):
-    # agent_spec = AgentSpec(
-    #     interface=AgentInterface(
-    #         max_episode_steps=max_episode_steps,
-    #         waypoints=True,
-    #         action=ActionSpaceType.LaneWithContinuousSpeed,
-    #         neighborhood_vehicles=True,
-    #     ),
-    #     agent_builder=ChaseViaPointsAgent,
-    # )
     agent_spec = AgentSpec(
-        interface=AgentInterface.from_type(
-            AgentType.StandardWithAbsoluteSteering, max_episode_steps=max_episode_steps
+        interface=AgentInterface(
+            max_episode_steps=max_episode_steps,
+            waypoints=True,
+            action=ActionSpaceType.LaneWithContinuousSpeed,
+            neighborhood_vehicles=True,
         ),
-        agent_builder=UTurnAgent,
+        agent_builder=ChaseViaPointsAgent,
     )
+    # agent_spec = AgentSpec(
+    #     interface=AgentInterface.from_type(
+    #         AgentType.StandardWithAbsoluteSteering, max_episode_steps=max_episode_steps
+    #     ),
+    #     agent_builder=UTurnAgent,
+    # )
     env = gym.make(
         "smarts.env:hiway-v0",
         scenarios=scenarios,

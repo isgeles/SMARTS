@@ -54,7 +54,7 @@ class UTurnAgent(Agent):
 
         position = pose.position[:2]
         lane = sim.scenario.road_network.nearest_lane(position)
-        
+
         if len(obs.neighborhood_vehicle_states) < 1:
             return (0, 0, 0)
 
