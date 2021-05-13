@@ -933,16 +933,6 @@ class WaypointsSensor(Sensor):
         self._lookahead = lookahead
 
     def __call__(self):
-        if self._mission_planner.mission.task is not None:
-            if isinstance(self._mission_planner.mission.task, UTurn):
-                return self._mission_planner.uturn_waypoints(
-                    self._sim, self._vehicle.pose, self._vehicle
-                )
-            elif isinstance(self._mission_planner.mission.task, CutIn):
-                return self._mission_planner.cut_in_waypoints(
-                    self._sim, self._vehicle.pose, self._vehicle
-                )
-
         return self._mission_planner.waypoint_paths_at(
             sim=self._sim,
             pose=self._vehicle.pose,
