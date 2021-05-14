@@ -34,6 +34,7 @@ class ChaseViaPointsAgent(Agent):
         self._counter = 0
         self.lateral_gain = 0.34
         self.heading_gain = 1.2
+        self._des_speed=12
 
     def act(self, obs: Observation):
         aggressiveness = 10
@@ -75,9 +76,10 @@ class ChaseViaPointsAgent(Agent):
 
         if self._task_is_triggered is False:
             self.lane_index = start_lane.getID().split("_")[-1]
-        des_speed = 12
+
         des_lane = 0
         off_des = (aggressiveness / 10) * 15 + (1 - aggressiveness / 10) * 25
+        des_speed=neighborhood_vehicles[0].speed
 
         if abs(fq - off_des) > 1 and self._task_is_triggered is False:
             fff = miss._waypoints.waypoint_paths_on_lane_at(
@@ -100,12 +102,14 @@ class ChaseViaPointsAgent(Agent):
             lat_error = fff[0].signed_lateral_error(
                 [vehicle.position[0], vehicle.position[1]]
             )
+            des_speed=self._des_speed
             if abs(lat_error) < 0.3:
                 self.lateral_gain = 0.34
                 self.heading_gain = 1.2
+                des_speed=neighborhood_vehicles[0].speed
             self._task_is_triggered = True
             position_adjust = -0.3 * (fq - off_des)
-            des_speed = 1.5 * neighborhood_vehicles[0].speed
+
 
         ggg = heading_error = min_angles_difference_signed(
             (obs.ego_vehicle_state.heading % (2 * math.pi)),

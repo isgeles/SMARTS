@@ -28,7 +28,6 @@ AGENT_ID = "Agent-007"
 
 class ChaseViaPointsAgent(Agent):
     def __init__(self):
-        self.lane_index = 1
         self._initial_heading = 0
         self._task_is_triggered = False
 
@@ -76,7 +75,6 @@ class ChaseViaPointsAgent(Agent):
 
         paths = miss.paths_of_lane_at(target_lane, oncoming_offset, lookahead=30)
 
-        self.lane_index = 0
         des_speed = 12
         des_lane = 0
 
@@ -84,19 +82,18 @@ class ChaseViaPointsAgent(Agent):
             fq > (aggressiveness / 10) * 65 + (1 - aggressiveness / 10) * 100
             and self._task_is_triggered is False
         ):
-            fff = obs.waypoint_paths[self.lane_index]
+            fff = obs.waypoint_paths[int(start_lane.getID().split("_")[-1])]
             self._initial_heading = obs.ego_vehicle_state.heading % (2 * math.pi)
 
         else:
             self._task_is_triggered = True
             fff = paths[des_lane]
 
-        ggg = heading_error = min_angles_difference_signed(
-            (obs.ego_vehicle_state.heading % (2 * math.pi)),
-            obs.neighborhood_vehicle_states[0].heading,
-        )
+        lat_error = fff[0].signed_lateral_error(
+                [vehicle.position[0], vehicle.position[1]]
+            )
 
-        if self._task_is_triggered is True and lane.getID() != target_l.getID():
+        if self._task_is_triggered is True and abs(lat_error)>0.3:
             des_speed = 8
 
         look_ahead_wp_num = 3
