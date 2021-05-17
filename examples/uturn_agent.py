@@ -39,7 +39,7 @@ class UTurnAgent(Agent):
 
         neighborhood_vehicles = obs.neighborhood_vehicle_states
         neighborhood_vehicles = [
-            vehicle for vehicle in neighborhood_vehicles if "target" in vehicle.id
+            vehicle for vehicle in neighborhood_vehicles if "ego" in vehicle.id
         ]
         pose = vehicle.pose
 

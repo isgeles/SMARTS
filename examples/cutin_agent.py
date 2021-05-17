@@ -40,7 +40,7 @@ class CutinAgent(Agent):
 
         neighborhood_vehicles = obs.neighborhood_vehicle_states
         neighborhood_vehicles = [
-            vehicle for vehicle in neighborhood_vehicles if "target" in vehicle.id
+            vehicle for vehicle in neighborhood_vehicles if "ego" in vehicle.id
         ]
 
         pose = vehicle.pose
@@ -59,7 +59,8 @@ class CutinAgent(Agent):
             fff = miss._waypoints.waypoint_paths_on_lane_at(
                 position, start_lane.getID(), 60
             )[0]
-            speed_difference = 1
+            speed_difference = 0
+            position_adjust = 0.2
 
         else:
             target_vehicle = neighborhood_vehicles[0]
