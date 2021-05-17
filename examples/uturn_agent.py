@@ -29,8 +29,6 @@ class UTurnAgent(Agent):
         des_speed = 12
         des_lane = 0
 
-        print(self.sim._vehicle_index.agent_vehicle_ids(), "OOOOO")
-
         vehicle = self.sim._vehicle_index.vehicles_by_actor_id(AGENT_ID)[0]
 
         miss = self.sim._vehicle_index.sensor_state_for_vehicle_id(
