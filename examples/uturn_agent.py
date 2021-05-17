@@ -26,7 +26,7 @@ logging.basicConfig(level=logging.INFO)
 AGENT_ID = "Agent-007"
 
 
-class ChaseViaPointsAgent(Agent):
+class UTurnAgent(Agent):
     def __init__(self):
         self._initial_heading = 0
         self._task_is_triggered = False
@@ -133,7 +133,7 @@ def main(scenarios, sim_name, headless, num_episodes, seed, max_episode_steps=No
         interface=AgentInterface.from_type(
             AgentType.StandardWithAbsoluteSteering, max_episode_steps=max_episode_steps
         ),
-        agent_builder=ChaseViaPointsAgent,
+        agent_builder=UTurnAgent,
     )
 
     env = gym.make(
@@ -150,8 +150,7 @@ def main(scenarios, sim_name, headless, num_episodes, seed, max_episode_steps=No
         # zoo_addrs=[("10.193.241.236", 7432)], # Sample server address (ip, port), to distribute social agents in remote server.
         # envision_record_data_replay_path="./data_replay",
     )
-    global vvv
-    ChaseViaPointsAgent.sim = env._smarts
+    UTurnAgent.sim = env._smarts
     # print(env._smarts, "::::::::::::::::::::::::::")
 
     for episode in episodes(n=num_episodes):
