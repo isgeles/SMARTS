@@ -113,6 +113,13 @@ def _build_single_scenario(clean, allow_offset_map, scenario):
     if scenario_py.exists():
         subprocess.check_call([sys.executable, scenario_py])
 
+    map_net = scenario_root / "map.net.xml"
+    map_glb = scenario_root / "map.glb"
+    generate_glb_from_sumo_network(str(map_net), str(map_glb))
+
+
+from pathlib import Path
+
 
 @scenario_cli.command(
     name="build-all",
@@ -137,17 +144,29 @@ def build_all_scenarios(clean, allow_offset_maps, scenarios):
     if not scenarios:
         # nargs=-1 in combination with a default value is not supported
         # if scenarios is not given, set /scenarios as default
-        scenarios = ["scenarios"]
+        scenarios = [str(Path("./scenarios").absolute())]
     builder_threads = {}
+    import smarts.core.scenario as sscenario
+
+    sscenario_dir_hash = hash(str(Path(sscenario.__file__).parent))
     for scenarios_path in scenarios:
         path = Path(scenarios_path)
-        for p in path.rglob("*.net.xml"):
-            scenario = f"{scenarios_path}/{p.parent.relative_to(scenarios_path)}"
-            builder_thread = Thread(
-                target=_build_single_scenario, args=(clean, allow_offset_maps, scenario)
-            )
-            builder_thread.start()
-            builder_threads[p] = builder_thread
+        done = {sscenario_dir_hash}
+        for p in (
+            p.resolve()
+            for p in path.rglob("**/*")
+            if p.name in ["map.net.xml", "scenario.py"]
+        ):
+            parent = p.parent.relative_to(str(Path(scenarios_path).absolute()))
+            parent_hash = hash(parent)
+            if parent_hash not in done:
+                done.add(parent_hash)
+                scenario = f"{scenarios_path}/{parent}"
+                builder_thread = Thread(
+                    target=_build_single_scenario, args=(clean, allow_offset_maps, scenario)
+                )
+                builder_thread.start()
+                builder_threads[p] = builder_thread
 
     for scenario_path, builder_thread in builder_threads.items():
         click.echo(f"Waiting on {scenario_path} ...")
