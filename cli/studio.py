@@ -163,7 +163,8 @@ def build_all_scenarios(clean, allow_offset_maps, scenarios):
                 done.add(parent_hash)
                 scenario = f"{scenarios_path}/{parent}"
                 builder_thread = Thread(
-                    target=_build_single_scenario, args=(clean, allow_offset_maps, scenario)
+                    target=_build_single_scenario,
+                    args=(clean, allow_offset_maps, scenario),
                 )
                 builder_thread.start()
                 builder_threads[p] = builder_thread

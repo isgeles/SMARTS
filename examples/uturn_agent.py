@@ -6,7 +6,7 @@ import numpy as np
 
 from examples import default_argument_parser
 from smarts.core.agent import Agent, AgentSpec
-from smarts.core.agent_interface import AgentInterface, AgentType
+from smarts.core.agent_interface import AgentInterface, AgentType, NeighborhoodVehicles
 from smarts.core.sensors import Observation
 from smarts.core.utils.episodes import episodes
 from smarts.core.utils.math import (
@@ -37,10 +37,10 @@ class UTurnAgent(Agent):
             vehicle.id
         ).mission_planner
 
-        neighborhood_vehicles = self.sim.neighborhood_vehicles_around_vehicle(
-            vehicle=vehicle, radius=850
-        )
-        neighborhood_vehicles = [vehicle for vehicle in neighborhood_vehicles if "ego" in vehicle.id]
+        neighborhood_vehicles = obs.neighborhood_vehicle_states
+        neighborhood_vehicles = [
+            vehicle for vehicle in neighborhood_vehicles if "target" in vehicle.id
+        ]
         pose = vehicle.pose
 
         start_lane = miss._road_network.nearest_lane(
@@ -58,17 +58,15 @@ class UTurnAgent(Agent):
         offset = miss._road_network.offset_into_lane(start_lane, pose.position[:2])
         oncoming_offset = max(0, target_lane.getLength() - offset)
         paths = miss.paths_of_lane_at(target_lane, oncoming_offset, lookahead=30)
-        
+
         if len(neighborhood_vehicles) < 1:
             fff = obs.waypoint_paths[int(start_lane.getID().split("_")[-1])]
-            self._initial_heading = obs.ego_vehicle_state.heading % (2 * math.pi)            
+            self._initial_heading = obs.ego_vehicle_state.heading % (2 * math.pi)
         else:
-            target_p = neighborhood_vehicles[0].pose.position[0:2]
+            target_p = neighborhood_vehicles[0].position[0:2]
             target_l = miss._road_network.nearest_lane(target_p)
             target_offset = miss._road_network.offset_into_lane(target_l, target_p)
             fq = target_lane.getLength() - offset - target_offset
-
-
 
             if (
                 fq > (aggressiveness / 10) * 65 + (1 - aggressiveness / 10) * 100
@@ -123,7 +121,9 @@ class UTurnAgent(Agent):
 def main(scenarios, sim_name, headless, num_episodes, seed, max_episode_steps=None):
     agent_spec = AgentSpec(
         interface=AgentInterface.from_type(
-            AgentType.StandardWithAbsoluteSteering, max_episode_steps=max_episode_steps
+            AgentType.StandardWithAbsoluteSteering,
+            max_episode_steps=max_episode_steps,
+            neighborhood_vehicles=NeighborhoodVehicles(850),
         ),
         agent_builder=UTurnAgent,
     )

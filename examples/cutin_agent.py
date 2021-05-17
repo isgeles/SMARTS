@@ -6,7 +6,7 @@ import numpy as np
 
 from examples import default_argument_parser
 from smarts.core.agent import Agent, AgentSpec
-from smarts.core.agent_interface import AgentInterface, AgentType
+from smarts.core.agent_interface import AgentInterface, AgentType, NeighborhoodVehicles
 from smarts.core.sensors import Observation
 from smarts.core.utils.episodes import episodes
 from smarts.core.utils.math import (
@@ -27,7 +27,7 @@ class CutinAgent(Agent):
         self._counter = 0
         self.lateral_gain = 0.34
         self.heading_gain = 1.2
-        self._des_speed=12
+        self._des_speed = 12
 
     def act(self, obs: Observation):
         aggressiveness = 10
@@ -38,10 +38,10 @@ class CutinAgent(Agent):
             vehicle.id
         ).mission_planner
 
-        neighborhood_vehicles = self.sim.neighborhood_vehicles_around_vehicle(
-            vehicle=vehicle, radius=850
-        )
-        neighborhood_vehicles = [vehicle for vehicle in neighborhood_vehicles if "ego" in vehicle.id]
+        neighborhood_vehicles = obs.neighborhood_vehicle_states
+        neighborhood_vehicles = [
+            vehicle for vehicle in neighborhood_vehicles if "target" in vehicle.id
+        ]
 
         pose = vehicle.pose
         position = pose.position[:2]
@@ -59,12 +59,12 @@ class CutinAgent(Agent):
             fff = miss._waypoints.waypoint_paths_on_lane_at(
                 position, start_lane.getID(), 60
             )[0]
-            speed_difference=1
+            speed_difference = 1
 
         else:
             target_vehicle = neighborhood_vehicles[0]
-            speed_difference=obs.ego_vehicle_state.speed - (target_vehicle.speed)
-            target_p = target_vehicle.pose.position[0:2]
+            speed_difference = obs.ego_vehicle_state.speed - (target_vehicle.speed)
+            target_p = target_vehicle.position[0:2]
             target_l = miss._road_network.nearest_lane(target_p)
 
             target_offset = miss._road_network.offset_into_lane(target_l, target_p)
@@ -137,7 +137,9 @@ class CutinAgent(Agent):
 def main(scenarios, sim_name, headless, num_episodes, seed, max_episode_steps=None):
     agent_spec = AgentSpec(
         interface=AgentInterface.from_type(
-            AgentType.StandardWithAbsoluteSteering, max_episode_steps=max_episode_steps
+            AgentType.StandardWithAbsoluteSteering,
+            max_episode_steps=max_episode_steps,
+            neighborhood_vehicles=NeighborhoodVehicles(850),
         ),
         agent_builder=CutinAgent,
     )
