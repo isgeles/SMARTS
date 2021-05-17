@@ -45,7 +45,7 @@ traffic = t.Traffic(
             rate=1,
             actors={
                 t.TrafficActor(
-                    "target",
+                    "ego",
                     speed=t.Distribution(mean=1, sigma=0),
                     lane_changing_model=t.LaneChangingModel(
                         strategic=0, cooperative=0, keepRight=0

@@ -37,7 +37,7 @@ traffic = t.Traffic(
                 end=("straightaway", 1, "max"),
             ),
             rate=1,
-            actors={t.TrafficActor("target"): 1},
+            actors={t.TrafficActor("ego"): 1},
         )
     ]
 )

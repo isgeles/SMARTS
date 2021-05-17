@@ -40,7 +40,7 @@ traffic = t.Traffic(
             ),
             rate=1,
             actors={
-                t.TrafficActor("target", speed=t.Distribution(mean=0.9, sigma=0)): 1
+                t.TrafficActor("ego", speed=t.Distribution(mean=0.9, sigma=0)): 1
             },
         )
     ]

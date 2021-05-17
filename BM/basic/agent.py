@@ -85,8 +85,8 @@ def main(scenarios, sim_name, headless, num_episodes, seed, max_episode_steps=No
             # env.scenario_log["scenario_map"]
         )
         ch: CheckerHost = CheckerHost(env._smarts, logger)
-        checker = UTurnChecker(bm_id=AGENT_ID, target_id="target")
-        # checker = CutinChecker(bm_id=AGENT_ID, target_id="target")
+        checker = UTurnChecker(bm_id=AGENT_ID, target_id="ego")
+        # checker = CutinChecker(bm_id=AGENT_ID, target_id="ego")
         ch.add_checkers(CheckerConfig(checker))
 
         dones = {"__all__": False}
