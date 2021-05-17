@@ -7,17 +7,10 @@ import numpy as np
 from examples import default_argument_parser
 from smarts.core.agent import Agent, AgentSpec
 from smarts.core.agent_interface import AgentInterface, AgentType
-from smarts.core.coordinates import Heading, Pose
 from smarts.core.sensors import Observation
 from smarts.core.utils.episodes import episodes
-from smarts.core.utils.math import evaluate_bezier as bezier
 from smarts.core.utils.math import (
-    lerp,
-    low_pass_filter,
     min_angles_difference_signed,
-    radians_to_vec,
-    signed_dist_to_line,
-    vec_to_radians,
 )
 from smarts.core.waypoints import Waypoint, Waypoints
 
@@ -33,9 +26,12 @@ class UTurnAgent(Agent):
 
     def act(self, obs: Observation):
         aggressiveness = 10
+        des_speed = 12
+        des_lane = 0
+
         print(self.sim._vehicle_index.agent_vehicle_ids(), "OOOOO")
 
-        vehicle = self.sim._vehicle_index.vehicles_by_actor_id("Agent-007")[0]
+        vehicle = self.sim._vehicle_index.vehicles_by_actor_id(AGENT_ID)[0]
 
         miss = self.sim._vehicle_index.sensor_state_for_vehicle_id(
             vehicle.id
@@ -44,15 +40,8 @@ class UTurnAgent(Agent):
         neighborhood_vehicles = self.sim.neighborhood_vehicles_around_vehicle(
             vehicle=vehicle, radius=850
         )
+        neighborhood_vehicles = [vehicle for vehicle in neighborhood_vehicles if "ego" in vehicle.id]
         pose = vehicle.pose
-
-        position = pose.position[:2]
-        lane = self.sim.scenario.road_network.nearest_lane(position)
-
-        sw = np.linalg.norm(
-            obs.neighborhood_vehicle_states[0].position[0:2]
-            - obs.ego_vehicle_state.position[0:2]
-        )
 
         start_lane = miss._road_network.nearest_lane(
             miss._mission.start.position,
@@ -68,32 +57,35 @@ class UTurnAgent(Agent):
 
         offset = miss._road_network.offset_into_lane(start_lane, pose.position[:2])
         oncoming_offset = max(0, target_lane.getLength() - offset)
-        target_p = neighborhood_vehicles[0].pose.position[0:2]
-        target_l = miss._road_network.nearest_lane(target_p)
-        target_offset = miss._road_network.offset_into_lane(target_l, target_p)
-        fq = target_lane.getLength() - offset - target_offset
-
         paths = miss.paths_of_lane_at(target_lane, oncoming_offset, lookahead=30)
-
-        des_speed = 12
-        des_lane = 0
-
-        if (
-            fq > (aggressiveness / 10) * 65 + (1 - aggressiveness / 10) * 100
-            and self._task_is_triggered is False
-        ):
+        
+        if len(neighborhood_vehicles) < 1:
             fff = obs.waypoint_paths[int(start_lane.getID().split("_")[-1])]
-            self._initial_heading = obs.ego_vehicle_state.heading % (2 * math.pi)
-
+            self._initial_heading = obs.ego_vehicle_state.heading % (2 * math.pi)            
         else:
-            self._task_is_triggered = True
-            fff = paths[des_lane]
+            target_p = neighborhood_vehicles[0].pose.position[0:2]
+            target_l = miss._road_network.nearest_lane(target_p)
+            target_offset = miss._road_network.offset_into_lane(target_l, target_p)
+            fq = target_lane.getLength() - offset - target_offset
+
+
+
+            if (
+                fq > (aggressiveness / 10) * 65 + (1 - aggressiveness / 10) * 100
+                and self._task_is_triggered is False
+            ):
+                fff = obs.waypoint_paths[int(start_lane.getID().split("_")[-1])]
+                self._initial_heading = obs.ego_vehicle_state.heading % (2 * math.pi)
+
+            else:
+                self._task_is_triggered = True
+                fff = paths[des_lane]
 
         lat_error = fff[0].signed_lateral_error(
-                [vehicle.position[0], vehicle.position[1]]
-            )
+            [vehicle.position[0], vehicle.position[1]]
+        )
 
-        if self._task_is_triggered is True and abs(lat_error)>0.3:
+        if self._task_is_triggered is True and abs(lat_error) > 0.3:
             des_speed = 8
 
         look_ahead_wp_num = 3
