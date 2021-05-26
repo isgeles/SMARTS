@@ -135,6 +135,7 @@ class CurriculumTest(unittest.TestCase):
                 policy_classes=policy_classes,
                 num_episodes=6,
                 max_episode_steps=2,
+                max_steps=1000,
                 eval_info={
                     "eval_rate": 50,
                     "eval_episodes": 2,
