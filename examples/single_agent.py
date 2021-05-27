@@ -1,12 +1,17 @@
+import inspect
 import logging
+from smarts.core.controllers import ActionSpaceType
 
 import gym
 
 from examples import default_argument_parser
 from smarts.core.agent import Agent, AgentSpec
-from smarts.core.agent_interface import AgentInterface, AgentType
+from smarts.core.agent_interface import AgentInterface, AgentType, NeighborhoodVehicles, Waypoints
 from smarts.core.sensors import Observation
 from smarts.core.utils.episodes import episodes
+from ultra.baselines.adapter import BaselineAdapter
+from ultra.baselines.ppo.ppo.policy import PPOPolicy
+from ultra.baselines.common.yaml_loader import load_yaml
 
 logging.basicConfig(level=logging.INFO)
 
@@ -32,11 +37,28 @@ class ChaseViaPointsAgent(Agent):
 
 
 def main(scenarios, sim_name, headless, num_episodes, seed, max_episode_steps=None):
+    # agent_spec = AgentSpec(
+    #     interface=AgentInterface.from_type(
+    #         AgentType.LanerWithSpeed, max_episode_steps=max_episode_steps
+    #     ),
+    #     agent_builder=ChaseViaPointsAgent,
+    # )
+
+    # For the PPO agent in ULTRA.
+    adapter = BaselineAdapter()
+    policy_dir = "/".join(inspect.getfile(PPOPolicy).split("/")[:-1])
+    policy_params = load_yaml(f"{policy_dir}/params.yaml")
     agent_spec = AgentSpec(
-        interface=AgentInterface.from_type(
-            AgentType.LanerWithSpeed, max_episode_steps=max_episode_steps
+        interface=AgentInterface(
+            waypoints=Waypoints(lookahead=20),
+            neighborhood_vehicles=NeighborhoodVehicles(radius=200),
+            action=ActionSpaceType.Continuous,
+            max_episode_steps=max_episode_steps,
         ),
-        agent_builder=ChaseViaPointsAgent,
+        agent_builder=PPOPolicy,
+        agent_params={"policy_params": policy_params},
+        observation_adapter=adapter.observation_adapter,
+        reward_adapter=adapter.reward_adapter,
     )
 
     env = gym.make(
