@@ -10,7 +10,7 @@ file_path = Path(__file__)
 path.append(str(file_path.parent.parent))
 from copy_scenario import copy_to_dir
 
-scenario_map_file = "maps/curve/2lane_ow_curve_ahead_long_2e"
+scenario_map_file = "maps/straight/2lane_ow_straight"
 
 logger = logging.getLogger(str(file_path))
 
@@ -18,16 +18,16 @@ scenario_name= str(file_path.parent.name)
 s_dir = str(file_path.parent)
 output_dir = f"{str(file_path.parent.parent)}/scenarios/{scenario_name}"
 
-base_ego_position = 200
 ego_missions = [
     t.Mission(
-        t.Route(
-            begin=("curve_ahead", 0, base_ego_position),
-            end=("curve_ahead", 1, "max"),
+        route=t.Route(
+            begin=("straightaway", 1, 1),
+            end=("straightaway", 0, 300),
         ),
         via=[
-            t.Via("curve_ahead", 0, 425, 20),
-            t.Via("curve_ahead", 1, 440, 15),
+            t.Via("straightaway", 1, 60, 20),
+            t.Via("straightaway", 0, 80, 15),
+            t.Via("straightaway", 0, 120, 7.5),
         ],
     )
 ]
@@ -36,20 +36,12 @@ traffic = t.Traffic(
     flows=[
         t.Flow(
             route=t.Route(
-                begin=("curve_ahead", 1, 240),
-                end=("curve_ahead", 1, "max"),
+                begin=("straightaway", 0, 1),
+                end=("straightaway", 0, "max"),
             ),
             rate=1,
-            actors={
-                t.TrafficActor(
-                    "ego",
-                    speed=t.Distribution(mean=1, sigma=0),
-                    lane_changing_model=t.LaneChangingModel(
-                        strategic=0, cooperative=0, keepRight=0
-                    ),
-                ): 1
-            },
-        )
+            actors={t.TrafficActor("ego"): 1},
+        ),
     ]
 )
 

@@ -6,20 +6,17 @@ from smarts.sstudio import types as t
 
 from sys import path
 
-path.append(str(Path(__file__).parent.parent))
+file_path = Path(__file__)
+path.append(str(file_path.parent.parent))
 from copy_scenario import copy_to_dir
 
-scenario_map_file = "scenarios/merge_2to1_lane_3times"
+scenario_map_file = "maps/merge/2lane_merge_2to1_lane_3times"
 
-logger = logging.getLogger(str(Path(__file__)))
+logger = logging.getLogger(str(file_path))
 
-s_dir = str(Path(__file__).parent)
-
-try:
-    copy_to_dir(scenario_map_file, s_dir)
-except Exception as e:
-    logger.error(f"Scenario {scenario_map_file} failed to copy")
-    raise e
+scenario_name= str(file_path.parent.name)
+s_dir = str(file_path.parent)
+output_dir = f"{str(file_path.parent.parent)}/scenarios/{scenario_name}"
 
 ego_missions = [
     t.Mission(
@@ -48,4 +45,9 @@ scenario = t.Scenario(
     ego_missions=ego_missions,
 )
 
-gen_scenario(scenario, output_dir=s_dir)
+try:
+    copy_to_dir(scenario_map_file, output_dir)
+except Exception as e:
+    logger.error(f"Scenario {scenario_map_file} failed to copy")
+    raise e
+gen_scenario(scenario, output_dir=output_dir, overwrite=True)

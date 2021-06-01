@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2021-05-28 13:22:04 by Eclipse SUMO netedit Version 1.9.2
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
+
+    <input>
+        <sumo-net-file value="2lane_ow_straight.net.xml"/>
+    </input>
+
+    <output>
+        <output-file value="/home/dev/Desktop/repos/NewSMARTS/SMARTS/BM/basic/scenarios/straight/2lane_ow_straight_north.net.xml"/>
+    </output>
+
+    <processing>
+        <geometry.min-radius.fix.railways value="false"/>
+        <geometry.max-grade.fix value="false"/>
+        <offset.disable-normalization value="true"/>
+        <lefthand value="false"/>
+    </processing>
+
+    <junctions>
+        <no-internal-links value="true"/>
+        <no-turnarounds value="true"/>
+        <junctions.corner-detail value="5"/>
+        <junctions.limit-turn-speed value="5.5"/>
+        <rectangular-lane-cut value="false"/>
+    </junctions>
+
+    <pedestrian>
+        <walkingareas value="false"/>
+    </pedestrian>
+
+    <report>
+        <aggregate-warnings value="5"/>
+    </report>
+
+</configuration>
+-->
+
+<net version="1.9" junctionCornerDetail="5" limitTurnSpeed="5.50" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+
+    <location netOffset="0.00,0.00" convBoundary="-59.67,38.63,-59.58,288.90" origBoundary="-10000000000.00,-10000000000.00,10000000000.00,10000000000.00" projParameter="!"/>
+
+    <edge id="straightaway" from="west_end" to="east_end" priority="-1">
+        <lane id="straightaway_0" index="0" speed="13.89" length="250.27" shape="-54.87,38.63 -54.78,288.90"/>
+        <lane id="straightaway_1" index="1" speed="13.89" length="250.27" shape="-58.07,38.63 -57.98,288.90"/>
+    </edge>
+
+    <junction id="east_end" type="dead_end" x="-59.58" y="288.90" incLanes="straightaway_0 straightaway_1" intLanes="" shape="-53.18,288.90 -59.58,288.90"/>
+    <junction id="west_end" type="dead_end" x="-59.67" y="38.63" incLanes="" intLanes="" shape="-59.67,38.63 -53.27,38.63"/>
+
+</net>

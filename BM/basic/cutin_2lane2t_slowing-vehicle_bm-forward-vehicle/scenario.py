@@ -1,4 +1,3 @@
-from examples.single_agent import UTurnAgent
 import logging
 from pathlib import Path
 
@@ -11,7 +10,7 @@ file_path = Path(__file__)
 path.append(str(file_path.parent.parent))
 from copy_scenario import copy_to_dir
 
-scenario_map_file = "maps/straight/6lane_straight"
+scenario_map_file = "maps/straight/2lane_ow_straight"
 
 logger = logging.getLogger(str(file_path))
 
@@ -19,73 +18,70 @@ scenario_name= str(file_path.parent.name)
 s_dir = str(file_path.parent)
 output_dir = f"{str(file_path.parent.parent)}/scenarios/{scenario_name}"
 
+try:
+    copy_to_dir(scenario_map_file, s_dir)
+except Exception as e:
+    logger.error(f"Scenario {scenario_map_file} failed to copy")
+    raise e
+
+
+base_offset = 40
 ego_missions = [
     t.Mission(
-        t.Route(begin=("-straightaway", 0, 30), end=("-straightaway", 0, "max")),
-        task=t.UTurn(initial_speed=20),
-    ),
+        route=t.Route(
+            begin=("straightaway", 1, 1),
+            end=("straightaway", 0, "max"),
+        ),
+        via=[
+            t.Via("straightaway", 1, 120 + base_offset, 20),
+            t.Via("straightaway", 0, 140 + base_offset, 15),
+            t.Via("straightaway", 0, 160 + base_offset, 7.5),
+        ],
+    )
 ]
 
-start_offset_target = 60
-start_offset_inner = 160
-start_offset_mid = 10
-interval = 10
 traffic = t.Traffic(
     flows=[
         t.Flow(
             route=t.Route(
-                begin=("straightaway", 2, o * interval + start_offset_inner),
-                end=("straightaway", 2, "max"),
+                begin=("straightaway", 0, 0 + base_offset),
+                end=("straightaway", 0, "max"),
             ),
             rate=1,
-            actors={
-                t.TrafficActor(
-                    "left_lane_car",
-                    speed=t.Distribution(mean=0.9, sigma=0),
-                    lane_changing_model=t.LaneChangingModel(
-                        strategic=0, cooperative=0, keepRight=0
-                    ),
-                ): 1
-            },
-        )
-        for o in range(4)
-    ]
-    + [
+            actors={t.TrafficActor("ego", speed=t.Distribution(mean=1, sigma=0)): 1},
+        ),
         t.Flow(
             route=t.Route(
-                begin=("straightaway", 1, o * interval + start_offset_mid),
+                begin=("straightaway", 1, 50 + base_offset),
                 end=("straightaway", 1, "max"),
             ),
             rate=1,
             actors={
                 t.TrafficActor(
-                    "mid_lane_car",
-                    speed=t.Distribution(mean=0.9, sigma=0),
+                    "left_lane_hog",
+                    speed=t.Distribution(mean=0.80, sigma=0),
                     lane_changing_model=t.LaneChangingModel(
                         strategic=0, cooperative=0, keepRight=0
                     ),
                 ): 1
             },
-        )
-        for o in range(4)
-    ]
-    + [
+        ),
         t.Flow(
             route=t.Route(
-                begin=("straightaway", 2, start_offset_target),
-                end=("straightaway", 2, "max"),
+                begin=("straightaway", 0, 40 + base_offset),
+                end=("straightaway", 0, "max"),
             ),
             rate=1,
             actors={
                 t.TrafficActor(
-                    "ego",
-                    speed=t.Distribution(mean=0.9, sigma=0),
+                    "forward_car",
+                    speed=t.Distribution(mean=1, sigma=0),
                     lane_changing_model=t.LaneChangingModel(
                         strategic=0, cooperative=0, keepRight=0
                     ),
                 ): 1
             },
-        )
+        ),
     ]
 )
 

@@ -15,7 +15,7 @@ def main(scenarios, sim_name, headless, num_episodes, seed, max_episode_steps=No
         agent_specs={},
         sim_name=sim_name,
         headless=headless,
-        sumo_headless=True,
+        sumo_headless=False,
         visdom=False,
         seed=seed,
         timestep_sec=0.1,
@@ -23,13 +23,15 @@ def main(scenarios, sim_name, headless, num_episodes, seed, max_episode_steps=No
 
     if max_episode_steps is None:
         max_episode_steps = 1000
-
+    import time
     for episode in episodes(n=num_episodes):
         env.reset()
         episode.record_scenario(env.scenario_log)
 
         for _ in range(max_episode_steps):
             env.step({})
+            
+            time.sleep(0.05)
             episode.record_step({}, {}, {}, {})
 
     env.close()
