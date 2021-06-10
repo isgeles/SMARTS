@@ -17,7 +17,7 @@ logger = logging.getLogger(str(file_path))
 
 scenario_name= str(file_path.parent.name)
 s_dir = str(file_path.parent)
-output_dir = f"{str(file_path.parent.parent)}/scenarios/{scenario_name}"
+output_dir = f"{str(file_path.parent.parent)}/scenarios/uturn/{scenario_name}"
 
 ego_missions = [
     t.Mission(
