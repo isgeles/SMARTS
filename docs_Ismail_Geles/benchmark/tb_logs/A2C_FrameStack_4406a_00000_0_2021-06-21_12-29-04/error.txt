@@ -1,0 +1,109 @@
+Failure # 1 (occurred at 2021-06-21_13-37-19)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.7/dist-packages/ray/tune/trial_runner.py", line 726, in _process_trial
+    result = self.trial_executor.fetch_result(trial)
+  File "/usr/local/lib/python3.7/dist-packages/ray/tune/ray_trial_executor.py", line 489, in fetch_result
+    result = ray.get(trial_future[0], timeout=DEFAULT_GET_TIMEOUT)
+  File "/usr/local/lib/python3.7/dist-packages/ray/worker.py", line 1452, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RayOutOfMemoryError): [36mray::A2C.train()[39m (pid=30999, ip=172.17.0.2)
+  File "python/ray/_raylet.pyx", line 482, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 436, in ray._raylet.execute_task.function_executor
+  File "/usr/local/lib/python3.7/dist-packages/ray/rllib/agents/trainer.py", line 517, in train
+    raise e
+  File "/usr/local/lib/python3.7/dist-packages/ray/rllib/agents/trainer.py", line 506, in train
+    result = Trainable.train(self)
+  File "/usr/local/lib/python3.7/dist-packages/ray/tune/trainable.py", line 336, in train
+    result = self.step()
+  File "/usr/local/lib/python3.7/dist-packages/ray/rllib/agents/trainer_template.py", line 147, in step
+    res = next(self.train_exec_impl)
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 756, in __next__
+    return next(self.built_iterator)
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 783, in apply_foreach
+    for item in it:
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 843, in apply_filter
+    for item in it:
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 843, in apply_filter
+    for item in it:
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 783, in apply_foreach
+    for item in it:
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 876, in apply_flatten
+    for item in it:
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 828, in add_wait_hooks
+    item = next(it)
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 783, in apply_foreach
+    for item in it:
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 783, in apply_foreach
+    for item in it:
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 783, in apply_foreach
+    for item in it:
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 471, in base_iterator
+    yield ray.get(futures, timeout=timeout)
+ray.exceptions.RayTaskError(RayOutOfMemoryError): [36mray::RolloutWorker.par_iter_next()[39m (pid=31003, ip=172.17.0.2)
+  File "python/ray/_raylet.pyx", line 444, in ray._raylet.execute_task
+  File "/usr/local/lib/python3.7/dist-packages/ray/memory_monitor.py", line 140, in raise_if_low_memory
+    self.error_threshold))
+ray.memory_monitor.RayOutOfMemoryError: More than 95% of the memory on node 6c107ba13ad6 is used (4.58 / 4.82 GB). The top 10 memory consumers are:
+
+PID	MEM	COMMAND
+31001	0.42GiB	ray::RolloutWorker
+31000	0.42GiB	ray::RolloutWorker
+31003	0.42GiB	ray::RolloutWorker
+30999	0.39GiB	ray::A2C.train()
+30903	0.31GiB	python run.py ./scenarios/double_merge/cross -f ./agents/a2c/baseline-lane-control.yaml --num_worker
+30935	0.08GiB	/usr/bin/python -u /usr/local/lib/python3.7/dist-packages/ray/dashboard/dashboard.py --host=127.0.0.
+31207	0.07GiB	/usr/bin/python /src/smarts/zoo/manager.py --port 60589
+30717	0.07GiB	/usr/bin/python /src/smarts/zoo/manager.py --port 40239
+31213	0.07GiB	/usr/bin/python /src/smarts/zoo/manager.py --port 39857
+31208	0.07GiB	/usr/bin/python /src/smarts/zoo/manager.py --port 34411
+
+In addition, up to 0.14 GiB of shared memory is currently being used by the Ray object store. You can set the object store size with the `object_store_memory` parameter when starting Ray.
+---
+--- Tip: Use the `ray memory` command to list active objects in the cluster.
+---
+
+Failure # 2 (occurred at 2021-06-21_13-38-30)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.7/dist-packages/ray/tune/trial_runner.py", line 726, in _process_trial
+    result = self.trial_executor.fetch_result(trial)
+  File "/usr/local/lib/python3.7/dist-packages/ray/tune/ray_trial_executor.py", line 489, in fetch_result
+    result = ray.get(trial_future[0], timeout=DEFAULT_GET_TIMEOUT)
+  File "/usr/local/lib/python3.7/dist-packages/ray/worker.py", line 1452, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError: [36mray::A2C.train()[39m (pid=31002, ip=172.17.0.2)
+  File "python/ray/_raylet.pyx", line 482, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 436, in ray._raylet.execute_task.function_executor
+  File "/usr/local/lib/python3.7/dist-packages/ray/rllib/agents/trainer.py", line 517, in train
+    raise e
+  File "/usr/local/lib/python3.7/dist-packages/ray/rllib/agents/trainer.py", line 506, in train
+    result = Trainable.train(self)
+  File "/usr/local/lib/python3.7/dist-packages/ray/tune/trainable.py", line 336, in train
+    result = self.step()
+  File "/usr/local/lib/python3.7/dist-packages/ray/rllib/agents/trainer_template.py", line 147, in step
+    res = next(self.train_exec_impl)
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 756, in __next__
+    return next(self.built_iterator)
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 783, in apply_foreach
+    for item in it:
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 843, in apply_filter
+    for item in it:
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 843, in apply_filter
+    for item in it:
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 783, in apply_foreach
+    for item in it:
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 876, in apply_flatten
+    for item in it:
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 828, in add_wait_hooks
+    item = next(it)
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 783, in apply_foreach
+    for item in it:
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 783, in apply_foreach
+    for item in it:
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 783, in apply_foreach
+    for item in it:
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 466, in base_iterator
+    actor_set.init_actors()
+  File "/usr/local/lib/python3.7/dist-packages/ray/util/iter.py", line 1238, in init_actors
+    ray.get([a.par_iter_init.remote(self.transforms) for a in self.actors])
+ray.exceptions.RayActorError: The actor died unexpectedly before finishing this task.
+
