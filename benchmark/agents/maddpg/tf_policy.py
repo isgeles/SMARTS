@@ -23,6 +23,7 @@
 import logging
 
 import gym
+from gym.spaces import MultiDiscrete
 import numpy as np
 from ray.rllib.agents.dqn.dqn_tf_policy import _adjust_nstep, minimize_and_clip
 from ray.rllib.contrib.maddpg.maddpg import DEFAULT_CONFIG
@@ -441,9 +442,18 @@ class MADDPG2TFPolicy(MADDPGPostprocessing, TFPolicy):
             for hidden in hiddens:
                 out = tf1.layers.dense(out, units=hidden, activation=activation)
             feature = tf1.layers.dense(out, units=act_space.shape[0], activation=None)
-            sampler = tfp.distributions.RelaxedOneHotCategorical(
-                temperature=1.0, logits=feature
-            ).sample()
+
+            # TODO: some problem occurs here...
+            nvec = None
+            if isinstance(act_space, MultiDiscrete):
+                nvec = act_space.nvec
+            if nvec is None:
+                sampler = tfp.distributions.RelaxedOneHotCategorical(
+                    temperature=1.0, logits=feature).sample()
+            else:
+                sampler = tf.concat([tfp.distributions.RelaxedOneHotCategorical(
+                    temperature=1.0, logits=feature).sample() for feature in
+                                     tf.split(feature, nvec, axis=1)], axis=1)
 
         return sampler, feature, model, tf1.global_variables(scope.name)
 

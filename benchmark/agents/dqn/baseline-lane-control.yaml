@@ -43,13 +43,13 @@ run:
   resume: False
   export_formats: [model, checkpoint]
   stop:
-    time_total_s: 14400
+    time_total_s: 5000
   config:
     log_level: ERROR
-    num_workers: 60
+    num_workers: 3
     num_gpus: 0
     horizon: 1000
     # learning
 
-checkpoint:
-  ./log/results/run/4lane-4/DQN_FrameStack_0_2021-01-25_16-59-276f728x1g/checkpoint_4/checkpoint-4
+# checkpoint:
+#   ./log/results/run/4lane-4/DQN_FrameStack_0_2021-01-25_16-59-276f728x1g/checkpoint_4/checkpoint-4

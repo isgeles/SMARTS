@@ -146,7 +146,7 @@ def load_config(config_file, mode="training", framework="rllib"):
         ),
         list("-+0123456789."),
     )
-    base_dir = Path(__file__).absolute().parent.parent.parent
+    base_dir = Path(__file__).absolute().parent.parent
     with open(base_dir / config_file, "r") as f:
         raw_config = yaml.safe_load(f)
 

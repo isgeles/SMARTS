@@ -38,7 +38,7 @@ def main(
     config_file,
     log_dir,
     restore_path=None,
-    num_workers=1,
+    num_workers=3,
     horizon=1000,
     paradigm="decentralized",
     headless=False,
